@@ -84,10 +84,8 @@ Ao finalizar o desenvolvimento:
 1. Suba o código para o repositório na branch criada.
 2. Abra um Pull Request para revisão.
 
-## Dicas
-- Escreva código limpo e bem estruturado.
-- Utilize boas práticas de desenvolvimento.
-- Caso tenha tempo, adicione testes unitários.
+## Apresentação
+Ao finalizar a entrega do projeto, irá acontecer uma reunião simulando um onboarding técnico onde você irá apresentar o código para uma pessoa desenvolvedora júnior para continuar as atividades.
 
 Boa sorte! 🚀
 
