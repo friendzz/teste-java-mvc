@@ -74,7 +74,6 @@ Caso o ID não seja encontrado:
 3. Utilize **Maven** para gestão de dependências.
 4. O banco de dados deve ser **H2**, com dados persistidos.
 5. O ID deve ser gerado automaticamente com **UUID**.
-6. A aplicação deve estar pronta para rodar com `mvn spring-boot:run`.
 
 ## Repositório e Versionamento
 1. O código deve ser commitado no **mesmo repositório** onde este teste está localizado.
