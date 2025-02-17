@@ -5,8 +5,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import pessoas.Entity.Pessoa;
+import pessoas.Excetions.Messages;
+import pessoas.Excetions.NaoDadosFailedException;
+import pessoas.Excetions.PessoaNaoEncontradaFailedException;
 import pessoas.Repository.PessoaRepository;
 
 import java.util.List;
@@ -15,7 +19,7 @@ import java.util.UUID;
 
 @PropertySource("classpath:/application.properties")
 @Service
-public class PessoaServiceImpl implements PessoaService {
+public class PessoaServiceImpl implements PessoaService, PessoaValidateService{
     private final Logger log = LoggerFactory.getLogger(PessoaServiceImpl.class);
 
     @Autowired
@@ -43,5 +47,20 @@ public class PessoaServiceImpl implements PessoaService {
 
     public Pessoa update(Pessoa pessoa) {
         return repository.save(pessoa);
+    }
+
+
+    @Override
+    public ResponseEntity throwNoData() throws NaoDadosFailedException {
+        String s = Messages.NAO_TEM_DADOS.toString();
+        System.out.println(s);
+        throw  new NaoDadosFailedException(s);
+    }
+
+    @Override
+    public ResponseEntity throwNoContent() throws PessoaNaoEncontradaFailedException {
+        String s = Messages.NAO_TEM_DADOS.toString();
+        System.out.println(s);
+        throw  new PessoaNaoEncontradaFailedException(s);
     }
 }

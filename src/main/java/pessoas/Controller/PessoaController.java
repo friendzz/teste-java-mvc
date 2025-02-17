@@ -6,8 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pessoas.Entity.Pessoa;
-import pessoas.Excetions.Messages;
 import pessoas.Excetions.NaoDadosFailedException;
+import pessoas.Excetions.PessoaNaoEncontrada;
 import pessoas.Mapper.PessoaMapper;
 import pessoas.Service.PessoaService;
 import pessoas.dto.PessoaDTO;
@@ -21,81 +21,74 @@ import java.util.UUID;
 @RequestMapping("/pessoas")
 public class PessoaController {
     private final Logger log = LoggerFactory.getLogger(PessoaController.class);
-    private final PessoaService service;
+    private final PessoaService pessoaService;
 
     public PessoaController(PessoaService service) {
-        this.service = service;
+        this.pessoaService = service;
     }
 
-    @GetMapping(value = {"","/"})
+    @GetMapping(value = {"", "/"})
     public ResponseEntity<?> findAll() throws NaoDadosFailedException {
         List<Pessoa> p;
-        p = service.findAll();
+        p = pessoaService.findAll();
         log.info(p.toString());
 
         //validate
 //        if (p == null || p.isEmpty()) return ResponseEntity.noContent().build();
-        if (p != null && !p.isEmpty() ) return ResponseEntity.ok(p);
+        if (p != null && !p.isEmpty()) return ResponseEntity.ok(p);
 
-        String s = Messages.NAO_TEM_DADOS.toString();
-        System.out.println(s);
-        throw  new NaoDadosFailedException(s);
+        return pessoaService.throwNoData();
+
 //        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 
     }
 
+
     @GetMapping("/{id}")
-    public ResponseEntity<?> findById(@PathVariable("id") UUID uuid) throws PessoaNaoEncontradaFailedException {
+    public ResponseEntity<?> findById(@PathVariable("id") UUID uuid){
 
-        Optional<Pessoa> pessoa = service.findById(uuid);
+        Optional<Pessoa> pessoa = pessoaService.findById(uuid);
 
-//        Optional<PessoaDTO> pessoaDTO = Optional.of(PessoaMapper.entityToDTO(pessoa.orElse(null)));
-        Optional<PessoaDTO> pessoaDTO = pessoa.map(p1->  PessoaMapper.entityToDTO(p1) );
-//        return pessoaDTO.map(ResponseEntity::ok)
-//                .orElseGet(
-//                        () -> ResponseEntity.status(HttpStatus.NOT_FOUND).build()
-//                );
-
-
-        if (pessoaDTO != null && !pessoaDTO.isEmpty() ) {return ResponseEntity.ok(pessoaDTO);}
-        else {
-            String s = Messages.PESSOA_NAO_ENCONTRADA.toString();
-            System.out.println(s);
-            throw  new PessoaNaoEncontradaFailedException(s);
+        if (pessoa == null) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+        if (pessoa.isEmpty()) {
+            PessoaNaoEncontrada pessoaNaoEncontrada = new PessoaNaoEncontrada();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(pessoaNaoEncontrada);
         }
 
-//        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Pessoa não encontrada");
-
-
+        PessoaDTO pessoaDTO = pessoa.map(p1 -> PessoaMapper.entityToDTO(p1)).get();
+        return ResponseEntity.ok(pessoaDTO);
     }
 
-    @PostMapping(value = {"","/"})
+    @PostMapping(value = {"", "/"})
     public Pessoa create(@RequestBody Pessoa pessoa) {
-        System.out.println(pessoa.toString());
-        return service.save(pessoa);
+        log.info(pessoa.toString());
+        return pessoaService.save(pessoa);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<PessoaDTO> update(@PathVariable UUID uuid, @RequestBody Pessoa pessoa) {
         pessoa.setUuid(uuid);
-        return ResponseEntity.ok(PessoaMapper.entityToDTO(service.update(pessoa)));
+        return ResponseEntity.ok(PessoaMapper.entityToDTO(pessoaService.update(pessoa)));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<PessoaDTO> patch(@PathVariable UUID id, @RequestBody PessoaDTO pessoaDTO) {
-        Optional<Pessoa> existingPessoa = service.findById(id);
+        Optional<Pessoa> existingPessoa = pessoaService.findById(id);
         if (existingPessoa.isPresent()) {
             Pessoa updatedPessoa = existingPessoa.get();
             if (pessoaDTO.getNome() != null) updatedPessoa.setNome(pessoaDTO.getNome());
             if (pessoaDTO.getEndereco() != null) updatedPessoa.setEndereco(pessoaDTO.getEndereco());
-            return ResponseEntity.ok(PessoaMapper.entityToDTO(service.update(updatedPessoa)));
+            return ResponseEntity.ok(PessoaMapper.entityToDTO(pessoaService.update(updatedPessoa)));
         }
         return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        service.deleteById(id);
+        pessoaService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 }
+
